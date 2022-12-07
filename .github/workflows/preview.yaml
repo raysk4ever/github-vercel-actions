@@ -26,7 +26,7 @@ jobs:
       - uses: zentered/vercel-preview-url@v1.0.0
         id: vercel_preview_url
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
       - name: Add comment to PR
         id: loading_comment_to_pr
