@@ -22,10 +22,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: aaimio/vercel-preview-url-action@v1
+      # - uses: aaimio/vercel-preview-url-action@v1
+      - uses: zentered/vercel-preview-url@v1.0.0
         id: vercel_preview_url
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
       - name: Add comment to PR
         id: loading_comment_to_pr
         uses: marocchino/sticky-pull-request-comment@v1
@@ -40,7 +42,7 @@ jobs:
         uses: treosh/lighthouse-ci-action@v3
         with:
           urls: |
-            ${{ steps.vercel_preview_url.outputs.vercel_preview_url }}
+            https://${{ steps.vercel_preview_url.outputs.preview_url }}
             https://teasit.com/
           uploadArtifacts: false
           temporaryPublicStorage: false
