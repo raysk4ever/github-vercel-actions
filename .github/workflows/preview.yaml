@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: aaimio/vercel-preview-url-action@v1
+      - uses: raysk4ever/vercel-api-handler@tesy
         id: vercel_preview_url
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -46,7 +46,7 @@ jobs:
         uses: treosh/lighthouse-ci-action@v3
         with:
           urls: |
-            https://${{ github.ref_name }}
+            https://${{ steps.vercel_preview_url.outputs.preview_url }}
             https://teasit.com/
           uploadArtifacts: false
           temporaryPublicStorage: false
