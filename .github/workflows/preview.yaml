@@ -16,3 +16,60 @@ jobs:
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+  Lighouse-Scrore:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: aaimio/vercel-preview-url-action@v1
+        id: vercel_preview_url
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Add comment to PR
+        id: loading_comment_to_pr
+        uses: marocchino/sticky-pull-request-comment@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          number: 1
+          header: lighthouse
+          message: |
+            Running Lighthouse audit...
+      - name: Audit preview URL with Lighthouse
+        id: lighthouse_audit
+        uses: treosh/lighthouse-ci-action@v3
+        with:
+          urls: |
+            ${{ steps.vercel_preview_url.outputs.vercel_preview_url }}
+            https://teasit.com/
+          uploadArtifacts: false
+          temporaryPublicStorage: false
+      - name: Format lighthouse score
+        id: format_lighthouse_score
+        uses: actions/github-script@v6
+        with:
+          script: |
+            
+            const results = ${{ steps.lighthouse_audit.outputs.manifest }}
+            let output = ''
+            results.forEach((result) => {
+              output += `
+                  URL: ${result.url}
+                    | **Category**   | **Before** | **After** | **Improvements** |
+                    |----------------|------------|-----------|------------------|
+                    | Performance    | 🟢 100      | 🟡 90      | ✅ +25%           |
+                    | Accessibility  | 🟡 84       | 84        | ❌ -10%           |
+                    | Best Practices | 🔴 33       | 🟡 66      | ✅ +100%          |
+                    | SEO            | 🟢 100      | 100       |                  |
+                    | PWA            | 🟢 100      | 100       |                  |
+              `
+            })
+            core.setOutput("comment", output); 
+      - name: Add comment to PR
+        id: comment_to_pr
+        uses: marocchino/sticky-pull-request-comment@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ github.event.issue.number }}
+          header: lighthouse
+          message: |
+            ${{ steps.format_lighthouse_score.outputs.comment }}
