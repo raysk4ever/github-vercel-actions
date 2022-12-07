@@ -33,7 +33,7 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         with:
-          vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel_project_id: QmRcLrF2N8RiYEDUBtbmKaMuvhKNqMVqxTyKo9HJ1MQwJt
           vercel_team_id: team_38kTuZDxkZmIiQceGKk6vJ1G
       - name: Add comment to PR
         id: loading_comment_to_pr
