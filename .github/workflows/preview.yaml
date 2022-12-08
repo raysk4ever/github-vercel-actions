@@ -31,7 +31,7 @@ jobs:
       - uses: raysk4ever/vercel-api-handler@tesyv0.1
         id: vercel_preview_url
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TOKEN: hOcp46XnQ4bR797FGXDt2Qco
         with:
           vercel_project_id: QmRcLrF2N8RiYEDUBtbmKaMuvhKNqMVqxTyKo9HJ1MQwJt
           vercel_team_id: team_38kTuZDxkZmIiQceGKk6vJ1G
