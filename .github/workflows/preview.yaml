@@ -49,7 +49,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const url = ${{ steps.vercel_preview_url.outputs.preview_url }}
+            const url = `${{ steps.vercel_preview_url.outputs.preview_url }}`;
             if (!url) {
               console.info('No URL Found!')
               core.process.exit(1)
