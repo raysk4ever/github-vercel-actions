@@ -28,7 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: zentered/vercel-preview-url@v1.0.0
+      - name: Fetch Vercel Preview URL
+        uses: raysk4ever/vercel-api-handler@tesyv0.2
         id: vercel_preview_url
         env:
           VERCEL_TOKEN: hOcp46XnQ4bR797FGXDt2Qco
