@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Fetch Vercel Preview URL
-        uses: raysk4ever/vercel-api-handler@v1.1
+        uses: raysk4ever/vercel-api-handler@v1.1.01
         id: vercel_preview_url
         env:
           VERCEL_TOKEN: hOcp46XnQ4bR797FGXDt2Qco
