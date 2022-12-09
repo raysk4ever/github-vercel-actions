@@ -59,7 +59,7 @@ jobs:
       #       }
       - name: Audit preview URL with Lighthouse
         id: lighthouse_audit
-        uses: treosh/lighthouse-ci-action@v3
+        uses: treosh/lighthouse-ci-action@v9
         with:
           urls: |
             https://teasit-99brt04l6-teasit.vercel.app/
