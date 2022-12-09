@@ -2,17 +2,23 @@ name: Vercel Preview Deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-on: push
+on:
+  pull_request:
+    branches: [ "main" ]
 jobs:
   Deploy-Preview:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         node-version: [14.x]
     steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
       - uses: actions/checkout@v2
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: sudo npm install --global vercel@latest
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts
@@ -25,14 +31,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      # - uses: aaimio/vercel-preview-url-action@v1
-      - uses: zentered/vercel-preview-url@v1.0.0
-        id: vercel_preview_url
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        with:
-          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
+      # - name: Fetch Vercel Preview URL
+      #   uses: raysk4ever/vercel-api-handler@v1.1.2
+      #   id: vercel_preview_url
+      #   env:
+      #     VERCEL_TOKEN: hOcp46XnQ4bR797FGXDt2Qco
+      #   with:
+      #     vercel_project_id: QmRcLrF2N8RiYEDUBtbmKaMuvhKNqMVqxTyKo9HJ1MQwJt
+      #     vercel_team_id: team_38kTuZDxkZmIiQceGKk6vJ1G
       - name: Add comment to PR
         id: loading_comment_to_pr
         uses: marocchino/sticky-pull-request-comment@v1
@@ -42,12 +48,21 @@ jobs:
           header: lighthouse
           message: |
             Running Lighthouse audit...
+      # - name: Check if URL is Fetched
+      #   uses: actions/github-script@v6
+      #   with:
+      #     script: |
+      #       const url = `${{ steps.vercel_preview_url.outputs.preview_url }}`;
+      #       if (!url) {
+      #         console.info('No URL Found!')
+      #         core.process.exit(1)
+      #       }
       - name: Audit preview URL with Lighthouse
         id: lighthouse_audit
-        uses: treosh/lighthouse-ci-action@v3
+        uses: treosh/lighthouse-ci-action@v9
         with:
           urls: |
-            https://${{ steps.vercel_preview_url.outputs.preview_url }}
+            https://teasit-99brt04l6-teasit.vercel.app/
             https://teasit.com/
           uploadArtifacts: false
           temporaryPublicStorage: false
@@ -58,17 +73,16 @@ jobs:
         with:
           script: |
             const results = ${{ steps.lighthouse_audit.outputs.manifest }}
-            console.log(results)
             const before = 'https://teasit.com/'
-            const after =  'https://${{ steps.vercel_preview_url.outputs.preview_url }}'
+            const after =  'https://teasit-99brt04l6-teasit.vercel.app/'
             const beforeStats = results.filter(i => i.url === before)
             const afterStats = results.filter(i => i.url === after)
             const calc = arr => {
               const temp = {
-                  performance: 0,
-                  accessibility: 0,
-                  seo: 0,
-                  pwa: 0
+                performance: 0,
+                accessibility: 0,
+                seo: 0,
+                pwa: 0
               }
               arr.forEach(i => {
                   const { performance, accessibility, seo, pwa} = i.summary
@@ -77,23 +91,27 @@ jobs:
                   temp.seo += seo
                   temp.pwa += pwa
               })
+              temp.performance = (temp.performance / 5).toFixed(2)
+              temp.accessibility = (temp.accessibility / 5).toFixed(2)
+              temp.seo = (temp.seo / 5).toFixed(2)
+              temp.pwa = (temp.pwa / 5).toFixed(2)
               return temp
             }
             const afterSummary = calc(afterStats)
             const beforeSummary = calc(beforeStats)
             let output = ''
-            results.forEach((result) => {
-              output += `
-                  URL: ${result.url}
-                    | **Category**   | **Before** | **After** | **Improvements** |
-                    |----------------|------------|-----------|------------------|
-                    | Performance    | 🟢 ${afterSummary.pwa}      | 🟡 ${beforeSummary.pwa}      | ✅ +25%           |
-                    | Accessibility  | 🟡 84       | 84        | ❌ -10%           |
-                    | Best Practices | 🔴 33       | 🟡 66      | ✅ +100%          |
-                    | SEO            | 🟢 100      | 100       |                  |
-                    | PWA            | 🟢 100      | 100       |                  |
-              `
-            })
+            const symbol = percent => percent >= 90 ? '🟢' : percent >= 50 ? '🟡' : '🔴'
+            const diff = (a, b) => a > b ? `✅ ${a - b}%` : a < b ? `🔻 ${a - b}%` : '⏺️ No Change' 
+            output += `
+              Preview URL: ${after}
+              Comparing With: ${before}
+              | Category      | Before | After | Improvements |
+              |---------------|--------|-------|--------------|
+              | Performance   | ${symbol(beforeSummary.performance * 100)} ${beforeSummary.performance * 100}    | ${symbol(beforeSummary.performance * 100)} ${afterSummary.performance * 100} | ${diff(afterSummary.performance * 100, beforeSummary.performance * 100)} |
+              | Accessibility | ${symbol(beforeSummary.accessibility * 100)} ${beforeSummary.accessibility * 100}  | ${symbol(beforeSummary.accessibility * 100)} ${afterSummary.accessibility * 100} | ${diff(afterSummary.accessibility * 100, beforeSummary.accessibility * 100)} |
+              | SEO           | ${symbol(beforeSummary.seo * 100)} ${beforeSummary.seo * 100}    | ${symbol(beforeSummary.seo * 100)} ${afterSummary.seo * 100} | ${diff(afterSummary.seo * 100, beforeSummary.seo * 100)} |
+              | PWA           | ${symbol(beforeSummary.pwa * 100)} ${beforeSummary.pwa * 100}    | ${symbol(beforeSummary.pwa * 100)} ${afterSummary.pwa * 100} | ${diff(afterSummary.pwa * 100, beforeSummary.pwa * 100)} |
+            `
             core.setOutput("comment", output); 
       - name: Add comment to PR
         id: comment_to_pr
