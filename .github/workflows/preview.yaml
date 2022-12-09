@@ -73,17 +73,16 @@ jobs:
         with:
           script: |
             const results = ${{ steps.lighthouse_audit.outputs.manifest }}
-            console.log(results)
             const before = 'https://teasit.com/'
-            const after =  'https://teasit-99brt04l6-teasit.vercel.app/'
+            const after =  'https://${{ steps.vercel_preview_url.outputs.preview_url }}/'
             const beforeStats = results.filter(i => i.url === before)
             const afterStats = results.filter(i => i.url === after)
             const calc = arr => {
               const temp = {
-                  performance: 0,
-                  accessibility: 0,
-                  seo: 0,
-                  pwa: 0
+                performance: 0,
+                accessibility: 0,
+                seo: 0,
+                pwa: 0
               }
               arr.forEach(i => {
                   const { performance, accessibility, seo, pwa} = i.summary
@@ -92,26 +91,27 @@ jobs:
                   temp.seo += seo
                   temp.pwa += pwa
               })
+              temp.performance = (temp.performance / 5).toFixed(2)
+              temp.accessibility = (temp.accessibility / 5).toFixed(2)
+              temp.seo = (temp.seo / 5).toFixed(2)
+              temp.pwa = (temp.pwa / 5).toFixed(2)
               return temp
             }
-            console.log('afterStats')
-            console.log(afterStats)
-            console.log('beforeStats')
-            console.log(beforeStats)
             const afterSummary = calc(afterStats)
             const beforeSummary = calc(beforeStats)
-            console.log(afterSummary)
-            console.log(beforeSummary)
             let output = ''
+            const symbol = percent => percent >= 90 ? '🟢' : percent >= 50 ? '🟡' : '🔴'
+            const diff = (a, b) => a > b ? `✅ ${a - b}%` : a < b ? `🔻 ${a - b}%` : '⏺️ No Change' 
             output += `
-                    | **Category**   | **Before** | **After** | **Improvements** |
-                    |----------------|------------|-----------|------------------|
-                    | Performance    | 🟢 ${afterSummary.pwa}      | 🟡 ${beforeSummary.pwa}      | ✅ +25%           |
-                    | Accessibility  | 🟡 84       | 84        | ❌ -10%           |
-                    | Best Practices | 🔴 33       | 🟡 66      | ✅ +100%          |
-                    | SEO            | 🟢 100      | 100       |                  |
-                    | PWA            | 🟢 100      | 100       |                  |
-              `
+              Preview URL: ${after}
+              Comparing With: ${before}
+              | Category      | Before | After | Improvements |
+              |---------------|--------|-------|--------------|
+              | Performance   | ${symbol(beforeSummary.performance * 100)} ${beforeSummary.performance * 100}    | ${symbol(beforeSummary.performance * 100)} ${afterSummary.performance * 100} | ${diff(afterSummary.performance * 100, beforeSummary.performance * 100)} |
+              | Accessibility | ${symbol(beforeSummary.accessibility * 100)} ${beforeSummary.accessibility * 100}  | ${symbol(beforeSummary.accessibility * 100)} ${afterSummary.accessibility * 100} | ${diff(afterSummary.accessibility * 100, beforeSummary.accessibility * 100)} |
+              | SEO           | ${symbol(beforeSummary.seo * 100)} ${beforeSummary.seo * 100}    | ${symbol(beforeSummary.seo * 100)} ${afterSummary.seo * 100} | ${diff(afterSummary.seo * 100, beforeSummary.seo * 100)} |
+              | PWA           | ${symbol(beforeSummary.pwa * 100)} ${beforeSummary.pwa * 100}    | ${symbol(beforeSummary.pwa * 100)} ${afterSummary.pwa * 100} | ${diff(afterSummary.pwa * 100, beforeSummary.pwa * 100)} |
+            `
             core.setOutput("comment", output); 
       - name: Add comment to PR
         id: comment_to_pr
