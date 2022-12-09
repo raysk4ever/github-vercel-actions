@@ -76,7 +76,7 @@ jobs:
             const results = ${{ steps.lighthouse_audit.outputs.manifest }}
             console.log(results)
             const before = 'https://teasit.com/'
-            const after =  'https://${{ steps.vercel_preview_url.outputs.preview_url }}'
+            const after =  'https://${{ steps.vercel_preview_url.outputs.preview_url }}/'
             const beforeStats = results.filter(i => i.url === before)
             const afterStats = results.filter(i => i.url === after)
             const calc = arr => {
