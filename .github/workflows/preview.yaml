@@ -101,7 +101,6 @@ jobs:
             console.log(beforeSummary)
             let output = ''
             output += `
-                  URL: ${result.url}
                     | **Category**   | **Before** | **After** | **Improvements** |
                     |----------------|------------|-----------|------------------|
                     | Performance    | 🟢 ${afterSummary.pwa}      | 🟡 ${beforeSummary.pwa}      | ✅ +25%           |
