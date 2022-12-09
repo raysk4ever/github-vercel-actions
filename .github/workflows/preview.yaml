@@ -97,9 +97,10 @@ jobs:
             }
             const afterSummary = calc(afterStats)
             const beforeSummary = calc(beforeStats)
+            console.log(afterSummary)
+            console.log(beforeSummary)
             let output = ''
-            results.forEach((result) => {
-              output += `
+            output += `
                   URL: ${result.url}
                     | **Category**   | **Before** | **After** | **Improvements** |
                     |----------------|------------|-----------|------------------|
@@ -109,7 +110,6 @@ jobs:
                     | SEO            | 🟢 100      | 100       |                  |
                     | PWA            | 🟢 100      | 100       |                  |
               `
-            })
             core.setOutput("comment", output); 
       - name: Add comment to PR
         id: comment_to_pr
