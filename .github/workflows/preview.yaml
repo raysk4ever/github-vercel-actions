@@ -61,8 +61,8 @@ jobs:
             console.log(results)
             const before = 'https://teasit.com/'
             const after =  'https://${{ steps.vercel_preview_url.outputs.preview_url }}'
-            const beforeStats = a.filter(i => i.url === before)
-            const afterStats = a.filter(i => i.url === after)
+            const beforeStats = results.filter(i => i.url === before)
+            const afterStats = results.filter(i => i.url === after)
             const calc = arr => {
               const temp = {
                   performance: 0,
