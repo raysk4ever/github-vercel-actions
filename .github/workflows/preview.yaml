@@ -51,7 +51,7 @@ jobs:
             https://teasit.com/
           uploadArtifacts: false
           temporaryPublicStorage: false
-          runs: 3
+          runs: 5
       - name: Format lighthouse score
         id: format_lighthouse_score
         uses: actions/github-script@v6
@@ -59,13 +59,35 @@ jobs:
           script: |
             const results = ${{ steps.lighthouse_audit.outputs.manifest }}
             console.log(results)
+            const before = 'https://teasit.com/'
+            const after =  'https://${{ steps.vercel_preview_url.outputs.preview_url }}'
+            const beforeStats = a.filter(i => i.url === before)
+            const afterStats = a.filter(i => i.url === after)
+            const calc = arr => {
+              const temp = {
+                  performance: 0,
+                  accessibility: 0,
+                  seo: 0,
+                  pwa: 0
+              }
+              arr.forEach(i => {
+                  const { performance, accessibility, seo, pwa} = i.summary
+                  temp.performance += performance
+                  temp.accessibility += accessibility
+                  temp.seo += seo
+                  temp.pwa += pwa
+              })
+              return temp
+            }
+            const afterSummary = calc(afterStats)
+            const beforeSummary = calc(beforeStats)
             let output = ''
             results.forEach((result) => {
               output += `
                   URL: ${result.url}
                     | **Category**   | **Before** | **After** | **Improvements** |
                     |----------------|------------|-----------|------------------|
-                    | Performance    | 🟢 100      | 🟡 90      | ✅ +25%           |
+                    | Performance    | 🟢 ${afterSummary.pwa}      | 🟡 ${beforeSummary.pwa}      | ✅ +25%           |
                     | Accessibility  | 🟡 84       | 84        | ❌ -10%           |
                     | Best Practices | 🔴 33       | 🟡 66      | ✅ +100%          |
                     | SEO            | 🟢 100      | 100       |                  |
