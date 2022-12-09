@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 jobs:
   Deploy-Preview:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         node-version: [14.x]
@@ -94,12 +94,16 @@ jobs:
               })
               return temp
             }
+            console.log('afterStats')
+            console.log(afterStats)
+            console.log('beforeStats')
+            console.log(beforeStats)
             const afterSummary = calc(afterStats)
             const beforeSummary = calc(beforeStats)
+            console.log(afterSummary)
+            console.log(beforeSummary)
             let output = ''
-            results.forEach((result) => {
-              output += `
-                  URL: ${result.url}
+            output += `
                     | **Category**   | **Before** | **After** | **Improvements** |
                     |----------------|------------|-----------|------------------|
                     | Performance    | 🟢 ${afterSummary.pwa}      | 🟡 ${beforeSummary.pwa}      | ✅ +25%           |
@@ -108,7 +112,6 @@ jobs:
                     | SEO            | 🟢 100      | 100       |                  |
                     | PWA            | 🟢 100      | 100       |                  |
               `
-            })
             core.setOutput("comment", output); 
       - name: Add comment to PR
         id: comment_to_pr
