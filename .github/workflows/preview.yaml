@@ -31,10 +31,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: raysk4ever/vercel-api-handler@tesyv0.1
+      - name: Fetch Vercel Preview URL
+        uses: raysk4ever/vercel-api-handler@v1.1.01
         id: vercel_preview_url
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TOKEN: hOcp46XnQ4bR797FGXDt2Qco
         with:
           vercel_project_id: QmRcLrF2N8RiYEDUBtbmKaMuvhKNqMVqxTyKo9HJ1MQwJt
           vercel_team_id: team_38kTuZDxkZmIiQceGKk6vJ1G
@@ -47,6 +48,16 @@ jobs:
           header: lighthouse
           message: |
             Running Lighthouse audit...
+      - name: Check if URL is Fetched
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const url = `${{ steps.vercel_preview_url.outputs.preview_url }}`;
+            if (!url) {
+              console.info('No URL Found!')
+              core.process.exit(1)
+            }
+            
       - name: Audit preview URL with Lighthouse
         id: lighthouse_audit
         uses: treosh/lighthouse-ci-action@v3
