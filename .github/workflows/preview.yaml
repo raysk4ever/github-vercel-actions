@@ -31,14 +31,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Fetch Vercel Preview URL
-        uses: raysk4ever/vercel-api-handler@v1.1.01
-        id: vercel_preview_url
-        env:
-          VERCEL_TOKEN: hOcp46XnQ4bR797FGXDt2Qco
-        with:
-          vercel_project_id: QmRcLrF2N8RiYEDUBtbmKaMuvhKNqMVqxTyKo9HJ1MQwJt
-          vercel_team_id: team_38kTuZDxkZmIiQceGKk6vJ1G
+      # - name: Fetch Vercel Preview URL
+      #   uses: raysk4ever/vercel-api-handler@v1.1.2
+      #   id: vercel_preview_url
+      #   env:
+      #     VERCEL_TOKEN: hOcp46XnQ4bR797FGXDt2Qco
+      #   with:
+      #     vercel_project_id: QmRcLrF2N8RiYEDUBtbmKaMuvhKNqMVqxTyKo9HJ1MQwJt
+      #     vercel_team_id: team_38kTuZDxkZmIiQceGKk6vJ1G
       - name: Add comment to PR
         id: loading_comment_to_pr
         uses: marocchino/sticky-pull-request-comment@v1
@@ -48,22 +48,21 @@ jobs:
           header: lighthouse
           message: |
             Running Lighthouse audit...
-      - name: Check if URL is Fetched
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const url = `${{ steps.vercel_preview_url.outputs.preview_url }}`;
-            if (!url) {
-              console.info('No URL Found!')
-              core.process.exit(1)
-            }
-            
+      # - name: Check if URL is Fetched
+      #   uses: actions/github-script@v6
+      #   with:
+      #     script: |
+      #       const url = `${{ steps.vercel_preview_url.outputs.preview_url }}`;
+      #       if (!url) {
+      #         console.info('No URL Found!')
+      #         core.process.exit(1)
+      #       }
       - name: Audit preview URL with Lighthouse
         id: lighthouse_audit
         uses: treosh/lighthouse-ci-action@v3
         with:
           urls: |
-            https://${{ steps.vercel_preview_url.outputs.preview_url }}
+            https://teasit-99brt04l6-teasit.vercel.app/
             https://teasit.com/
           uploadArtifacts: false
           temporaryPublicStorage: false
@@ -76,7 +75,7 @@ jobs:
             const results = ${{ steps.lighthouse_audit.outputs.manifest }}
             console.log(results)
             const before = 'https://teasit.com/'
-            const after =  'https://${{ steps.vercel_preview_url.outputs.preview_url }}'
+            const after =  'https://teasit-99brt04l6-teasit.vercel.app/'
             const beforeStats = results.filter(i => i.url === before)
             const afterStats = results.filter(i => i.url === after)
             const calc = arr => {
