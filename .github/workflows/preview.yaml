@@ -95,6 +95,10 @@ jobs:
               })
               return temp
             }
+            console.log('afterStats')
+            console.log(afterStats)
+            console.log('beforeStats')
+            console.log(beforeStats)
             const afterSummary = calc(afterStats)
             const beforeSummary = calc(beforeStats)
             console.log(afterSummary)
